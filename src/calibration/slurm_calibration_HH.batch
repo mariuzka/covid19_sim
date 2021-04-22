@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH --job-name=calib_hh
+#SBATCH --partition=multi
+#SBATCH --nodes=12
+#SBATCH --ntasks-per-node=16
+#SBATCH --time=48:00:00
+#SBATCH --mem=16gb
+
+module load devel/python_intel/3.7
+module load mpi/openmpi/4.0-intel-18.0
+
+conda activate covid19_sim
+
+mpiexec -n 192 python calibration_hh.py

@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH --job-name=exp_bayern
+#SBATCH --partition=single
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=10
+#SBATCH --time=50:00:00
+#SBATCH --mem=16gb
+
+module load devel/python_intel/3.7
+
+conda activate covid19_sim
+
+python run_simulation_experiment_bayern.py

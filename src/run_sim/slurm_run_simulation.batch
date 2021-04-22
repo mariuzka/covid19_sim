@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH --job-name=run_simulation
+#SBATCH --partition=single
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=2:00:00
+#SBATCH --mem=4gb
+
+module load devel/python_intel/3.7
+
+conda activate covid19_sim
+
+python run_simulation.py
