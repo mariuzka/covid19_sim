@@ -1,8 +1,9 @@
 import datetime
 import math
 import random
+from typing import List
 
-def dates_between(date1, date2):
+def dates_between(date1: datetime.date, date2: datetime.date) -> List[datetime.date]:
     """
     FUNCTION
     Returns all dates between the given dates incl. the given dates

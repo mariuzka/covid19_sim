@@ -1,14 +1,22 @@
 import datetime as dt
-import pickle
+from pathlib import Path
 import random
-import statistics
 import time
+from typing import List
 
 import numpy as np
 import pandas as pd
+import pygame
+
+import src
+from src.sim.agent import Agent
+from src.sim.world import World
+from src.sim.cell import Cell
+from src.sim.building import Building
+from src.sim.visualizer import Visualizer
+from src.sim.helper import dates_between
+
 pd.options.mode.chained_assignment = None
-
-
 
 
 class Sim:
@@ -23,8 +31,8 @@ class Sim:
 
     def __init__(
             self, 
-            state, # an integer of the list below
-            n_simulated_days = 100,
+            state: int,
+            n_simulated_days: int = 100,
             ):
         
         assert state in [2,8,9,10]
@@ -32,29 +40,29 @@ class Sim:
         self.state = state
         
         self.fed_states = {
-        2:  "Hamburg",
-        8:  "Baden-Wuerttemberg",
-        9:  "Bavaria",
-        10: "Saarland",
+            2:  "Hamburg",
+            8:  "Baden-Wuerttemberg",
+            9:  "Bavaria",
+            10: "Saarland",
         }
         
         self.fed_states_german = {
-        2:  "Hamburg",
-        8:  "Baden-Württemberg",
-        9:  "Bayern",
-        10: "Saarland",
+            2:  "Hamburg",
+            8:  "Baden-Württemberg",
+            9:  "Bayern",
+            10: "Saarland",
         }
         
         # load school data
-        school_data = pd.read_excel("data/germany/schools.xlsx")
+        school_data = pd.read_excel(Path.joinpath(src.PATH, "data", "germany", "schools.xlsx"))
         school_data["pupils/school"] = school_data["pupils"] // school_data["schools"]
         school_data["pupils/class"] = school_data["pupils"] // school_data["classes"]
         school_data["classes/school"] = school_data["classes"] // school_data["schools"]
         school_data = school_data.set_index(school_data["state"])
-        self.school_data = school_data
+        self.school_data: pd.DataFrame = school_data
         
         # load kindergarten data        
-        kids_per_kindergarten = pd.read_excel("data/germany/kindergarten_group_size.xlsx")
+        kids_per_kindergarten = pd.read_excel(Path.joinpath(src.PATH, "data", "germany", "kindergarten_group_size.xlsx"))
         kids_per_kindergarten = kids_per_kindergarten.set_index("state")
         kids_per_kindergarten = int(kids_per_kindergarten.loc[self.fed_states[state], "kindergarten_group_size"])
         
@@ -65,53 +73,53 @@ class Sim:
         # self.care_rate_data = care_rate_data
         
         # load homeoffice data
-        wfh_data = pd.read_csv("data/germany/Alipouretal_WFH_Germany-master/wfh_nace2.csv")
+        wfh_data = pd.read_csv(Path.joinpath(src.PATH, "data", "germany", "wfh_nace2.csv"))
         wfh_data = wfh_data.set_index("nace2")
         wfh_data["wfh_freq"] = wfh_data["wfh_freq"] / 100
         wfh_data["wfh_feas"] = wfh_data["wfh_feas"] / 100
-        self.wfh_data = wfh_data
+        self.wfh_data: pd.DataFrame = wfh_data
         
         # load data on closed workplaces
-        nace2_lockdown_data = pd.read_csv("data/germany/nace2_lockdown.csv")
+        nace2_lockdown_data = pd.read_csv(Path.joinpath(src.PATH, "data", "germany", "nace2_lockdown.csv"))
         nace2_lockdown_data = nace2_lockdown_data.set_index("nace2_short")
-        self.nace2_lockdown_data = nace2_lockdown_data
+        self.nace2_lockdown_data: pd.DataFrame = nace2_lockdown_data
         
         # load data on reduced work hours
-        nace2_short_reduction_of_workhours = pd.read_excel("data/germany/nace2_short_reduction_of_workhours.xlsx")
+        nace2_short_reduction_of_workhours = pd.read_excel(Path.joinpath(src.PATH, "data", "germany", "nace2_short_reduction_of_workhours.xlsx"))
         nace2_short_reduction_of_workhours["quarter2"] = nace2_short_reduction_of_workhours["quarter2"] / (-100)
         nace2_short_reduction_of_workhours = nace2_short_reduction_of_workhours.set_index("nace2_short")
         self.nace2_short_reduction_of_workhours = nace2_short_reduction_of_workhours
         
         # load soep-data 
-        soep = pd.read_csv("data/soep4sim/soep_for_corona_simulation.csv")
-        self.soep = soep[soep["federal_state"] == state]
+        soep = pd.read_csv(Path.joinpath(src.PATH, "data", "soep4sim", "soep_for_corona_simulation.csv"))
+        self.soep: pd.DataFrame = soep[soep["federal_state"] == state]
         
         # average number of possible contacts / colleagues at work
-        self.n_colleagues = 10
+        self.n_colleagues: int = 10
         
         # average number per kindergarten-group (variable name is misleading)
-        self.kids_per_kindergarten = kids_per_kindergarten
+        self.kids_per_kindergarten: int = kids_per_kindergarten
         
         # maximum number of students per university
-        self.students_per_university = 100000
+        self.students_per_university: int = 100000
         
         # number of hours kids visit kindergarten
-        self.hours_at_kindergarten = 5
+        self.hours_at_kindergarten: int = 5
         
         # number of hours pupils visit school
-        self.hours_at_school = 5
+        self.hours_at_school: int = 5
         
         # number of hours students visit university
-        self.hours_at_university = 4
+        self.hours_at_university: int = 4
         
         # number of cells on x-axis (deprecated)
-        self.grid_x_len = 100
+        self.grid_x_len: int = 100
         
         # number of cells on y-axis (deprecated)
-        self.grid_y_len = 100
+        self.grid_y_len: int = 100
         
         # is the world a torus? (deprecated)
-        self.torus = True
+        self.torus: bool = True
         
         # skipped hours at night
         self.n_hours_timetravel = 6
@@ -369,7 +377,7 @@ class Sim:
             # create population
             agent_population_in_households = self.create_soep_population(
                 N = N,
-                agent_class = Corona_Agent,
+                agent_class = Agent,
             )
             
             # Count agents
@@ -482,9 +490,9 @@ class Sim:
     
     def internal_run(
             self,
-            agent_population_in_households,
-            location_dependend_infection_prob_dict,
-            simulation_run,
+            agent_population_in_households: List[List[Agent]],
+            location_dependend_infection_prob_dict: dict,
+            simulation_run: int,
             n_nace2,
             n_schools,
             n_supermarkets,
@@ -505,7 +513,7 @@ class Sim:
     
         # create world
         world = World(self.grid_x_len, self.grid_y_len)
-        world.create_grid(Corona_Cell)
+        world.create_grid(Cell)
     
         # create agent population
         world.agents.update({"agents": []})
@@ -702,9 +710,11 @@ class Sim:
         #######################################################################
         
         # get all workplaces
-        all_firms = [cell 
-                     for cell in world.grid_as_flat_list
-                     if "firm" in cell.cell_type ]
+        all_firms = [
+            cell 
+            for cell in world.grid_as_flat_list
+            if "firm" in cell.cell_type
+            ]
         
         # for each working agents
         for agent in world.agents["agents"]:
@@ -744,9 +754,11 @@ class Sim:
         #######################################################################
         
         # get all universities
-        list_of_universities = [cell 
-                                for cell in world.grid_as_flat_list
-                                if cell.cell_type == "university"]
+        list_of_universities = [
+            cell 
+            for cell in world.grid_as_flat_list
+            if cell.cell_type == "university"
+            ]
         
         # for each agents
         for agent in world.agents["agents"]:
@@ -1287,13 +1299,13 @@ class Sim:
         return output_dict
 
 
-    def create_soep_population(self, N, agent_class):
+    def create_soep_population(self, N: int, agent_class: Agent) -> List[List[Agent]]:
         """
         This method creates the population of agents informed by the SOEP.
         
         INPUT
         N: number of agents to be created (int)
-        agent_class: Agent-Class to be used (normally: Corona_Agent)
+        agent_class: Agent-Class to be used (normally: Agent)
         
         OUTPUT
         households: List of lists (households) containing the agents

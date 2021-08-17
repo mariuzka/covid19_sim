@@ -1,8 +1,5 @@
-from src.sim.agent import *
-from src.sim.cell import *
+from src.sim.cell import Cell
 from src.sim.helper import *
-from src.sim.visualizer import *
-from src.sim.world import *
 
 class World:
     """
@@ -10,10 +7,11 @@ class World:
     Sie kann jedoch mehrere Populationen von Agenten beherbergen.
     """
 
-    def __init__(self,
-                 len_x_grid_dim,
-                 len_y_grid_dim,
-                 ):
+    def __init__(
+        self,
+        len_x_grid_dim: int,
+        len_y_grid_dim: int,
+        ):
 
         self.len_x_grid_dim = len_x_grid_dim
         self.len_y_grid_dim = len_y_grid_dim
@@ -21,21 +19,18 @@ class World:
         self.half_x_grid_dim = int(self.len_x_grid_dim / 2)
         self.half_y_grid_dim = int(self.len_y_grid_dim / 2)
 
-        self.grid_as_matrix = [[]]
-        self.grid_as_flat_list = []
+        self.grid_as_matrix: List[List[Cell]] = [[]]
+        self.grid_as_flat_list: List[Cell] = []
 
-        self.NW_grid_as_flat_list = []
-        self.NE_grid_as_flat_list = []
-        self.SW_grid_as_flat_list = []
-        self.SE_grid_as_flat_list = []
+        self.NW_grid_as_flat_list: List[Cell] = []
+        self.NE_grid_as_flat_list: List[Cell] = []
+        self.SW_grid_as_flat_list: List[Cell] = []
+        self.SE_grid_as_flat_list: List[Cell] = []
 
-        self.agents = {}
-
-        self.heaven = []
+        self.agents: dict = {}
 
 
-
-    def create_grid(self, cell_class = "standard"):
+    def create_grid(self, cell_class: int = "standard"):
 
         self.grid_as_matrix = []
         self.grid_as_flat_list = []
