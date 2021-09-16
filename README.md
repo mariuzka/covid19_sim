@@ -1,8 +1,7 @@
 ## Requirements
 - SOEP: An important prerequisite in order to use this version of the model an important is to have permission to use the Socio-economic Panel 2017 and to have a copy of this dataset on your local machine. You can get the data [here](https://www.diw.de/sixcms/detail.php?id=diw_01.c.738729.en).
 - STATA: Unfortunately, the current version of the model also requires a working installation of STATA (version >= 13). *(We are currently working on an update which will remove the requirement for STATA and will replace the STATA-code by python-code.)*
-- Conda: To install and activate the specific virtual python environment a current installation of Conda is required.
-
+- Conda: To install and activate the specific virtual python environment, a current installation of Conda is required.
 
 ## Setup
 1. Clone this repository onto your local machine.
@@ -14,7 +13,8 @@
 7. Install the virtual environment from the file "env.yaml" using conda.
 8. If everything has been done correctly, the model is now ready for use.
 
+## Single simulation
+...
 
-## Model execution
-
+## Simulation experiments
 ...
