@@ -197,12 +197,12 @@ class Sim:
         ### data on infections & simulated dates & evaluation data for model calibration ###
         
         # load data on population size
-        population_data = pd.read_excel("data/germany/population_data.xlsx")
+        population_data = pd.read_excel(Path.joinpath(src.PATH, "data", "germany", "population_data.xlsx"))
         population_data["scale_to_100k"] = 100000 / population_data["population"]
         self.population_data = population_data.set_index("state")
         
         # load data on infections & merge with data on population
-        df = pd.read_csv("data/germany/RKI_COVID19_neu.csv")
+        df = pd.read_csv(Path.joinpath(src.PATH, "data", "germany", "RKI_COVID19_neu.csv"))
         df = pd.merge(df, population_data, how = "left", left_on = "Bundesland", right_on = "state_german")
         
         # filter by state ("dfs" = "df_state")

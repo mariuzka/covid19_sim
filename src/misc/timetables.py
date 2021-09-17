@@ -14,19 +14,6 @@ SCHOOL_PHASE_2 = 0.3
 SCHOOL_PHASE_3 = 0.6
 
 
-# Pfingstferien Bayern 02.06. - 13.06.
-# Sommerferien Bayern 27.07. - 07.09.
-
-# Pfingstferien Bawü 02.06. - 13.06.
-# Sommerferien Bawü 30.07. - 12.09. 
-
-# Pfingstferuen Hamburg 18.05. - 22.05.
-# Sommerferien Hamburg 25.06. - 05.08.
-
-# Osterferien Saarland 14.04. - 24.04.
-# Sommerferien Saarland 06.07. - 14.08.
-
-
 timetable_default = {
     dt.datetime(2020, 1, 1) : {
         "school": OPEN,
