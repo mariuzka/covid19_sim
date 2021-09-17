@@ -21,9 +21,10 @@ We chose the four states in Germany (Baden-Wuerttemberg, Bavaria, Hamburg, Saarl
 8. If everything has been done correctly, the model is now ready for use.
 
 ## Single simulation
-A single simulation can be executed by first creating a `model`-object and then executing the `model`-method `run()`.
-
-The simplest way to do this, is to use the file `"run_simulation.py"` from the module `src.run_sim`
+A single simulation can be executed by first creating a `model`-object and then executing the `model`-method `run()`. 
+The simplest way to do this, is to use the file `"run_simulation.py"` from the module `src.run_sim`.
+Adjust the parameters, execute the python-file and the output-data will appear in the folder `"output_data"`.
+In the output file the column `"cumulative_cases"` gives the cumulative number of infected agents per day and the column `"adj_cumulative_cases/100k"` scales this value to a population of 100,000 inhabitants. The column `"empirical_cumulative_cases/100k"` provides the empirical cumulative number of cases per 100,000 inhabitants in the chosen federal state.
 
 ## Simulation experiments
 To conduct the simulation experiments performed in this [paper](https://www.medrxiv.org/content/10.1101/2021.04.16.21255606v1), four files were prepared, each running the experiment for one of the considered states.
@@ -32,5 +33,6 @@ To conduct the simulation experiments performed in this [paper](https://www.medr
 - Bavaria: `"run_simulation_experiment_BY.py"`
 - Saarland: `"run_simulation_experiment_SL.py"`
 
-The number of replications per scenario is preconfigured to a value of 60, which leads to a total runtime of several days if executed on a single core.
+The number of replications per scenario is preconfigured to a value of 60, which could lead to a total runtime of several days if executed on a single core.
 Therefore it is recommended to change the parameter `parallel` from `False` to `True` in order to parallelize one simulation experiment on up to 10 cores (*please note that if running the simulation under windows, the attempt to parallelize might fail*).
+
