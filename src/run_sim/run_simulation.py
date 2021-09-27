@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import seaborn as sns
+
 import src
 from src.misc.timetables import *
 from src.run_sim.def_get_params import get_spotpy_params
@@ -24,7 +26,7 @@ N = 1000
 N_INITIAL_INFECTIONS = 50
 
 # set the number of replications
-N_INTERNAL_RUNS = 1
+N_INTERNAL_RUNS = 10
 
 # set a name for the simulation
 NAME_OF_RUN = "baseline_scenario_bavaria"
@@ -66,3 +68,9 @@ params = [
 
 model = Sim(STATE)
 output = model.run(params)
+
+
+##################################################################################
+# simple plot
+##################################################################################
+

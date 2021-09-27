@@ -373,6 +373,7 @@ class Sim:
         
         # for each internal run / repetition
         for run in range(n_internal_runs):
+            print(f"{dt.datetime.now()} - {name_of_run}: running replication {run+1} of {n_internal_runs} ({round(((run+1)/n_internal_runs)*100, 2)}%)")
             
             # create population
             agent_population_in_households = self.create_soep_population(
@@ -471,7 +472,7 @@ class Sim:
         
         # save main dataframe as csv & data on age distributions as pickle
         if save_output:
-            output_file_name = "output_data/output_" + name_of_run + ".csv"
+            output_file_name = Path.joinpath(src.PATH, "output_data", "output_" + name_of_run + ".csv")
             output_dataframe.to_csv(output_file_name, index = False)
             # pickle.dump(age_distributions, open("output_data/infagedist_" + name_of_run + ".p", "wb"))
         

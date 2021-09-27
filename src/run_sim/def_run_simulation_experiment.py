@@ -2,6 +2,7 @@ import datetime as dt
 import math
 import os
 import time
+from typing import Union
 
 from joblib import Parallel, delayed
 from matplotlib import pyplot as plt
@@ -12,23 +13,24 @@ from src.misc.timetables import *
 
 
 def run_simulation_experiment(
-        state,
-        infection_prob,
-        n_ticks_to_quarantine,
-        parallel,
-        n_internal_runs = 60,
-        n_initial_infections = 50,
-        n = 100000,
-        n_random_infections = 0,
-        save_output = True,
-        display_simulation = False,
+        state: int,
+        infection_prob: float,
+        n_ticks_to_quarantine: Union[int, float],
+        parallel: bool,
+        n_internal_runs: int = 60,
+        n_initial_infections: int = 50,
+        n: int = 100000,
+        n_random_infections: Union[int, float] = 0,
+        save_output: bool = True,
+        display_simulation: bool = False,
     ):
 
+    # create state-specific simulation model
     model = Sim(state)
     
     # list of all timetables + a scenario name
     timetables = [
-        (timetable_default, "standard"),
+        (timetable_default, "baseline"),
         (timetable_no_homeoffice, "no_homeoffice"),
         (timetable_no_reduction_of_work, "no_reduction_of_work"),
         (timetable_no_quarantine, "no_quarantine"),
