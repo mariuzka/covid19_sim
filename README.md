@@ -1,12 +1,12 @@
 # An empirically-calibrated ABM for the evaluation of NPIs
 The overall purpose of this model is to investigate the effects of various non-pharmaceutical interventions (NPI) in curbing the spread of COVID-19.
-The model predicts case numbers of counter-factual scenarios in which certain NPIs are (not) implemented.
+The model predicts case numbers of counterfactual scenarios in which certain NPIs are (not) implemented.
 The model is evaluated by its ability to reproduce time-series data of empirically observed case numbers in a baseline scenario that mimics the factual implementation of NPIs happened in spring 2020 in Germany.
 In the current version of the model the infections on the level of four federal states with differing social structures are simulated. 
 We chose the four states in Germany (Baden-Wuerttemberg, Bavaria, Hamburg, Saarland) with the highest infection rate relative to its population size during the first wave of Covid-19 in Germany (March 2020).
 
 ## Requirements
-- **SOEP**: An important prerequisite in order to use this version of the model an important is to have permission to use the Socio-economic Panel 2017 and to have a copy of this dataset on your local machine. You can get the data [here](https://www.diw.de/sixcms/detail.php?id=diw_01.c.738729.en).
+- **SOEP**: An important prerequisite in order to use this version of the model is to have permission to use the Socio-economic Panel 2017 and to have a copy of this dataset on your local machine. You can get the data [here](https://www.diw.de/sixcms/detail.php?id=diw_01.c.738729.en).
 - **STATA**: Unfortunately, the current version of the model also requires a working installation of STATA (version >= 13). *(We are currently working on an update which will remove the requirement for STATA and will replace the STATA-code by python-code.)*
 - **Conda**: To install and activate the specific virtual python environment, a current installation of Conda is required.
 
