@@ -21,7 +21,7 @@ We chose the four states in Germany (Baden-Wuerttemberg, Bavaria, Hamburg, Saarl
 8. If everything has been done correctly, the model is now ready for use.
 
 ## Single simulation
-A single simulation can be executed by first creating a `model`-object and then executing the `model`-method `run()`. 
+A single simulation can be executed by first creating a `model`-object from the module `src.sim.sim` and then executing the `model`-method `run()`. 
 The simplest way to do this, is to use the file `"run_simulation.py"` from the module `src.run_sim`.
 Adjust the parameters, execute the python-file and the output-data will appear in the folder `"output_data"`.
 In the output file the column `"cumulative_cases"` gives the cumulative number of infected agents per day and the column `"adj_cumulative_cases/100k"` scales this value to a population of 100,000 inhabitants. The column `"empirical_cumulative_cases/100k"` provides the empirical cumulative number of cases per 100,000 inhabitants in the chosen federal state.
