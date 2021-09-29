@@ -1,7 +1,60 @@
 import datetime
 import math
 import random
-from typing import List
+from typing import List, Optional
+
+import pandas as pd
+
+def load_soep_df(
+    path,
+    rename_columns: Optional[dict]=None,
+    keep_columns: Optional[list]=None,
+    filter_function: Optional[callable]=None,
+    drop_duplicates: bool=False,
+    drop_essential_missings: bool=True,
+    keep_renamed_columns=True,
+    ) -> pd.DataFrame:
+
+    # load dataset
+    df = pd.read_stata(path, convert_categoricals=False)
+    
+    # drop row if missing in important standard column
+    if drop_essential_missings:
+        for col in ["hid", "pid", "syear"]:
+            if col in df.columns:
+                df = df[~df[col].isna()]
+
+    # rename columns if a dict with old/new names has been provided
+    if rename_columns is not None:
+        df = df.rename(columns=rename_columns)
+    
+    # keep only the specified or renamed columns
+    if keep_columns is not None or keep_renamed_columns:
+        if not isinstance(keep_columns, list) and keep_renamed_columns:
+            keep_columns = []
+        
+        if rename_columns is not None and keep_renamed_columns:
+            for col_name in rename_columns.values():
+                if col_name not in keep_columns:
+                    keep_columns.append(col_name)
+        
+        standard_columns = [name for name in ["hid", "pid", "syear"] if name in df.columns and name not in keep_columns]
+        keep_columns.extend(standard_columns)
+        
+        df = df[keep_columns]
+    
+    # filter dataframe using a provided filter-function
+    if filter_function is not None:
+        df = filter_function(df)
+
+    # drop duplicates on important standard columns
+    if drop_duplicates:
+        len_df = len(df)
+        df = df.drop_duplicates(subset=["syear", "pid"])
+        print(f"{len_df - len(df)} duplicates dropped.")
+
+    return df
+
 
 def dates_between(date1: datetime.date, date2: datetime.date) -> List[datetime.date]:
     """
@@ -100,8 +153,6 @@ def shortest_distance_to_target(
 
     else:
         return direct_distance
-
-
 
 
 def direction_to_target(my_dim_pos, target_dim_pos, dim_len, torus=True):

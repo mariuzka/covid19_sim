@@ -20,13 +20,13 @@ STATE = 9
 TIMETABLE = timetable_default
 
 # set the number of agents
-N = 1000
+N = 100000
 
 # set the number of initially infected agents
 N_INITIAL_INFECTIONS = 50
 
 # set the number of replications
-N_INTERNAL_RUNS = 10
+N_INTERNAL_RUNS = 3
 
 # set a name for the simulation
 NAME_OF_RUN = "baseline_scenario_bavaria"
@@ -68,9 +68,3 @@ params = [
 
 model = Sim(STATE)
 output = model.run(params)
-
-
-##################################################################################
-# simple plot
-##################################################################################
-

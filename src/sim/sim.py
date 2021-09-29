@@ -7,6 +7,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import pygame
+from plotnine import ggplot, aes, geom_point, geom_line, geom_smooth
 
 import src
 from src.sim.agent import Agent
@@ -486,6 +487,17 @@ class Sim:
             "calibration_data": avg_scaled_cumulative_cases, # data for calibration
             "age_distributions": age_distributions,
             }
+
+        # save simple plot
+        g = (ggplot(data=output_dataframe) +
+                geom_point(mapping=aes(x="day", y="empirical_cumulative_cases/100k")) + 
+                geom_point(mapping=aes(x="day", y="adj_cumulative_cases/100k"), alpha=0.5) + 
+                geom_smooth(mapping=aes(x="day", y="adj_cumulative_cases/100k"), span=.3)
+        )
+
+        if save_output:
+            g.save(Path.joinpath(src.PATH, "output_data", "graph_" + name_of_run + ".pdf"))
+    
         return output_dict
     
     
