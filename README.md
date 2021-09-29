@@ -20,6 +20,10 @@ We chose the four states in Germany (Baden-Wuerttemberg, Bavaria, Hamburg, Saarl
 7. Install the virtual environment from the file `"env.yaml"` using conda.
 8. If everything has been done correctly, the model is now ready for use.
 
+## Overview
+The building blocks of the simulation are located in the module `src.sim`, especially in the files `sim.py` and `agent.py`.
+The main scripts to execute the simulation can be found in the module `src.run_sim`.
+
 ## Single simulation
 A single simulation can be executed by first creating a `model`-object from the module `src.sim.sim` and then executing the `model`-method `run()`. 
 The simplest way to do this, is to use the file `"run_simulation.py"` from the module `src.run_sim`.
