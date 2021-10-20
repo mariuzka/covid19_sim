@@ -127,3 +127,18 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# my ignore-list
+/data/soep.v34
+/data/soep4sim
+/output_data
+/results
+/temp
+.Rhistory
+.vscode
+/analysis
+.gitignore
+/important_outputs/data/
+/important_outputs/population/
+stata_01_merge_soep_datasets_copy.do
+stata_02_clean_soep_data_copy.do

@@ -1,7 +1,7 @@
 set more off
 
 * set the working directory to the folder of this do-file
-chdir "..."
+chdir ""
 
 ********************************************************************************
 
