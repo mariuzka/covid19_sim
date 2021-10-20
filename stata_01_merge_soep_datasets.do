@@ -22,20 +22,13 @@ save "data\soep4sim\bioagel_no_dups.dta", replace
 
 use "data\soep.v34\stata_de+en\pl.dta", replace
 
-rename plb0096 homeoffice_n
 rename plb0183_h work_hours_day
 rename plb0186_h work_hours_week
 rename plb0022_h erwerbsstatus
-rename pli0040 hours_shopping // Stunden Besorgungen machen an Werktagen
-rename pld0047 n_friends // Anzahl enge Freunde 
-rename ple0008 health // Gegenwärtiger Gesundheitszustand
-rename pli0079 go_out // Essen, trinken gehen
-rename pli0081 freq_visits_family // Besuche Familie, Verwandte
-rename pli0080 freq_visits_friends // Besuche Nachbarn, Freunde
-rename pli0098 freq_church // Kirchgang
+rename pli0040 hours_shopping
 rename plg0015_h stipendium
 
-keep pid hid syear stipendium erwerbsstatus homeoffice_n work_hours_day work_hours_week n_friends health go_out freq_visits_family freq_church hours_shopping
+keep pid hid syear stipendium erwerbsstatus work_hours_day work_hours_week hours_shopping
 
 save "data\soep4sim\pl_small.dta", replace
 

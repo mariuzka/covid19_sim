@@ -26,7 +26,7 @@ N = 100000
 N_INITIAL_INFECTIONS = 50
 
 # set the number of replications
-N_INTERNAL_RUNS = 5
+N_INTERNAL_RUNS = 60
 
 # set a name for the simulation
 NAME_OF_RUN = "baseline_scenario_bavaria"
