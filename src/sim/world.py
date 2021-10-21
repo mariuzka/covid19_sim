@@ -2,11 +2,6 @@ from src.sim.cell import Cell
 from src.sim.helper import *
 
 class World:
-    """
-    Eine Welt hat genau ein Grid.
-    Sie kann jedoch mehrere Populationen von Agenten beherbergen.
-    """
-
     def __init__(
         self,
         len_x_grid_dim: int,
@@ -43,13 +38,12 @@ class World:
                 if cell_class == "standard":
                     cell = Cell(x, y)
                 else:
-                    cell = cell_class(x, y) # Jede Zellenklasse muss als erste Eingabeparameter die X- und Y-Position haben
+                    cell = cell_class(x, y)
 
                 row.append(cell)
 
                 self.grid_as_flat_list.append(cell)
 
-                # Zellen auch zu den 4 Quadranten hinzufügen
                 if x < self.half_x_grid_dim:
                     if y < self.half_y_grid_dim:
                         self.NW_grid_as_flat_list.append(cell)
@@ -65,7 +59,6 @@ class World:
             self.grid_as_matrix.append(row)
 
 
-    # returns a list of empty cells in own grid
     def get_empty_cells(self):
         empty_cells = [cell for cell in self.grid_as_flat_list if len(cell.residents) == 0]
         return empty_cells
@@ -76,7 +69,7 @@ class World:
             population,
             rule = "random_on_empty_cells",
     ):
-        # Das Grid muss groß genug für die Population sein
+        
         assert len(self.grid_as_flat_list) >= len(population)
 
         if rule == "random_on_empty_cells":

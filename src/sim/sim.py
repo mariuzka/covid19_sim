@@ -6,15 +6,13 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-import pygame
-from plotnine import ggplot, aes, geom_point, geom_line, geom_smooth
+import seaborn as sns
 
 import src
 from src.sim.agent import Agent
 from src.sim.world import World
 from src.sim.cell import Cell
 from src.sim.building import Building
-from src.sim.visualizer import Visualizer
 from src.sim.helper import dates_between
 
 pd.options.mode.chained_assignment = None
@@ -66,12 +64,6 @@ class Sim:
         kids_per_kindergarten = pd.read_excel(Path.joinpath(src.PATH, "data", "germany", "kindergarten_group_size.xlsx"))
         kids_per_kindergarten = kids_per_kindergarten.set_index("state")
         kids_per_kindergarten = int(kids_per_kindergarten.loc[self.fed_states[state], "kindergarten_group_size"])
-        
-        # care_rate_data = pd.read_excel("data/germany/betreuungsquote.xlsx")
-        # care_rate_data = care_rate_data.set_index(care_rate_data["state"])
-        # care_rate_data["0_bis_2"] = care_rate_data["3_bis_5"] / 100
-        # care_rate_data["3_bis_5"] = care_rate_data["3_bis_5"] / 100
-        # self.care_rate_data = care_rate_data
         
         # load homeoffice data
         wfh_data = pd.read_csv(Path.joinpath(src.PATH, "data", "germany", "wfh_nace2.csv"))
@@ -488,15 +480,11 @@ class Sim:
             "age_distributions": age_distributions,
             }
 
-        # save simple plot
-        g = (ggplot(data=output_dataframe) +
-                geom_point(mapping=aes(x="day", y="empirical_cumulative_cases/100k")) + 
-                geom_point(mapping=aes(x="day", y="adj_cumulative_cases/100k"), alpha=0.5) + 
-                geom_smooth(mapping=aes(x="day", y="adj_cumulative_cases/100k"), span=.3)
-        )
-
         if save_output:
-            g.save(Path.joinpath(src.PATH, "output_data", "graph_" + name_of_run + ".pdf"))
+            # save simple plot
+            g = sns.lineplot(data=output_dataframe, x="day", y="adj_cumulative_cases/100k")
+            g = g.get_figure()
+            g.savefig(Path.joinpath(src.PATH, "output_data", "graph_" + name_of_run + ".pdf"))
     
         return output_dict
     
@@ -881,58 +869,6 @@ class Sim:
         new_cases = 0
         new_cases_age = 0
         
-        
-        #######################################################################
-        # gui
-        #######################################################################
-    
-        # initialize visualizer/gui
-        if display_simulation:
-            gui = Visualizer(
-                world.len_x_grid_dim,
-                world.len_y_grid_dim,
-                display_speed=40,
-            )
-            
-            # zwei Werte für die Darstellung des traffic flows
-            gui.draw_traffic = 0
-            gui.traffic_contrast = 5
-    
-            # color table for cells
-            CELL_TYPE_COLORS = {
-                "street": gui.colors["gainsboro"],
-                "home": gui.colors["dim gray"],
-                "firm": gui.colors["chocolate"],
-                "supermarket": gui.colors["dodger blue"],
-                "school": gui.colors["rosy brown"],
-                "kindergarten": gui.colors["pink"],
-                "university": gui.colors["sea green"],
-            }
-            
-            # spezielle Firmen in Farbenkatalog aufnehmen
-            for i in range(-3, 100):
-                CELL_TYPE_COLORS.update({"firm" + str(i):gui.colors["chocolate"]})
-                
-            # Farbenkatalog für Darstellung der Agenten je nach Infektionsstadium
-            AGENT_COLORS = {
-                "s": gui.colors["black"],
-                "e": gui.colors["gold"],
-                "i": gui.colors["orange"],
-                "a": gui.colors["pink"],
-                "m": gui.colors["red"],
-                "r": gui.colors["forest green"],
-                "q": gui.colors["blue"],
-            }
-            AGENT_REL_SIZE = -gui.cell_height / 1.5
-        
-        # list of all building-cells
-        buildings = [cell for cell in world.grid_as_flat_list if cell.building]
-    
-        # list of all street-cells
-        street = [cell for cell in world.grid_as_flat_list if not cell.building]
-        
-        
-        
         #######################################################################
         # time
         #######################################################################
@@ -1211,92 +1147,6 @@ class Sim:
                         world.grid_as_matrix,
                         self.torus,
                     )
-            ######## GUI ######################################################
-            
-            if display_simulation:
-    
-                ###############################################################
-                # draw grid
-                ###############################################################
-    
-                # draw buildings
-                gui.draw_population_with_categorial_attributes(
-                    buildings,
-                    "cell_type",
-                    CELL_TYPE_COLORS,
-                    draw_outline=True,
-                )
-                # draw street
-                gui.draw_population_with_immutable_color(
-                   street,
-                    CELL_TYPE_COLORS["street"],
-                    draw_outline=False,
-                    outline_color="dim gray",
-                )
-    
-                # draw agents
-                gui.draw_population_with_categorial_attributes(
-                    world.agents["agents"],
-                    "infection",
-                    AGENT_COLORS,
-                    draw_outline=False,
-                    jitter = True,
-                    agent_relative_width= AGENT_REL_SIZE,
-                    agent_relative_height = AGENT_REL_SIZE ,
-                )
-
-
-                ###############################################################
-                # draw graphs
-                ###############################################################
-    
-                # plot SIR
-                infection_states = [agent.infection for agent in world.agents["agents"]]
-                
-                SIR_data = {
-                    "s" : infection_states.count("s"),
-                    "e" : infection_states.count("e"),
-                    "i" : infection_states.count("i"),
-                    "a" : infection_states.count("a"),
-                    "m" : infection_states.count("m"),
-                    "r" : infection_states.count("r"),
-                    "q" : sum([agent.quarantine for agent in world.agents["agents"]])
-                    }
-                
-                gui.plot(
-                    "Infection status",
-                    SIR_data,
-                    plotting_interval = self.n_ticks_per_day,
-                    summary_method=lambda x: x[-1],
-                    line_colors=list(AGENT_COLORS.values()),
-                )
-    
-                gui.plot(
-                    "cumulative cases",
-                    {"cases": cumulative_cases},
-                    plotting_interval = self.n_ticks_per_day,
-                    summary_method=max,
-                )
-    
-                ###############################################################
-                # draw sliders
-                ###############################################################
-    
-                gui.control(
-                    "tick/s",
-                    gui,
-                    "display_speed",
-                    0,
-                    50,
-                )
-    
-                # update screen / make simulation step
-                gui.update_screen()
-
-        # close pygame
-        if display_simulation:
-            pygame.display.quit()
-            pygame.quit()
         
         
         age_of_infected_agents = [
@@ -1315,13 +1165,6 @@ class Sim:
     def create_soep_population(self, N: int, agent_class: Agent) -> List[List[Agent]]:
         """
         This method creates the population of agents informed by the SOEP.
-        
-        INPUT
-        N: number of agents to be created (int)
-        agent_class: Agent-Class to be used (normally: Agent)
-        
-        OUTPUT
-        households: List of lists (households) containing the agents
         """
         
         # all NACE codes

@@ -3,11 +3,6 @@ from typing import List, Optional
 from src.sim.cell import Cell
 
 class Building:
-
-    """
-    A building can be built on one or more cells. 
-    A building defines the location type of a cell.
-    """
     def __init__(
             self,
             building_type: str,
@@ -34,8 +29,6 @@ class Building:
             grid_as_matrix: List[List[Cell]],
 
     ):
-        """Builds the building on cells on the grid."""
-        
         # for each cell of the building ground
         for y in range(building_y_origin, building_y_origin + self.n_cells_y_dim):
             for x in range(building_x_origin, building_x_origin + self.n_cells_x_dim):
@@ -53,9 +46,6 @@ class Building:
             grid_as_flat_list: List[Cell],
             grid_as_matrix: List[List[Cell]],
     ):
-        
-        """Builds the building on a random vacant position on the grid."""
-        
         vacant_ground = [
             cell
             for cell in grid_as_flat_list

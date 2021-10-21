@@ -5,11 +5,6 @@ from src.sim.cell import Cell
 
 
 class Agent:
-
-    """
-    Ein Agent kann sich auf dem Grid bewegen und befindet sich dabei zu jedem Zeitpunkt auf einer Zelle.
-    """
-
     max_agents_on_cell: Optional[int] = None
     moving_prob: Optional[float] = None
 
@@ -25,8 +20,8 @@ class Agent:
         self.x_grid_pos: Optional[int] = None
         self.y_grid_pos: Optional[int] = None
         
-        # ????????????????????
-        self.population = list # Die Populationsliste einer Welt, in der der Agent "existiert"/eingespeichert ist
+        # population list
+        self.population = list
 
         # gender
         self.gender: Optional[int] = None
@@ -95,35 +90,25 @@ class Agent:
 
 
     def move_in(self, new_residence_cell):
-        """ Eine neue Zelle beziehen"""
-        self.residence_cell = new_residence_cell                        # neuen Aufenthaltsort einspeichern
-        self.residence_cell.dict_of_residents.update({self.name: self}) # Bei Zelle anmelden
-        self.x_grid_pos = self.residence_cell.x_grid_pos    # Koordinaten des neuen Aufenthaltsortes übernehmen
+        self.residence_cell = new_residence_cell                        
+        self.residence_cell.dict_of_residents.update({self.name: self}) 
+        self.x_grid_pos = self.residence_cell.x_grid_pos   
         self.y_grid_pos = self.residence_cell.y_grid_pos
 
 
     def move_out(self):
-        """ Ordnungsgemäßes Verlassen einer Zelle"""
-        del(self.residence_cell.dict_of_residents[self.name]) # sich selbst aus Dict löschen
-        self.residence_cell = None             # Zelle als Aufenthaltsort entfernen
-        self.x_grid_pos = None                  # X-Position entfernen
-        self.y_grid_pos = None                  # Y-Position entfernen
+        del(self.residence_cell.dict_of_residents[self.name]) 
+        self.residence_cell = None            
+        self.x_grid_pos = None                 
+        self.y_grid_pos = None                 
 
 
     def move_to_this_cell(self, new_residence_cell):
-        """
-        FUNCTION
-        Aus der aktuellen Zelle ausziehen und zugleich bei einer neuen Zelle einziehen,
-
-        INPUT
-        Neue Zelle
-        """
-        self.move_out()                     # ausziehen
-        self.move_in(new_residence_cell)    # einziehen
+        self.move_out()                     
+        self.move_in(new_residence_cell)   
 
 
     def infect(self, tick: int, location_dependend_infection_prob_dict: dict):
-        
         """
         Models the potential tranmission of the virus.
         If this agent is infectious, it randomly chooses another agent that is
@@ -161,7 +146,6 @@ class Agent:
                 
                 
     def update_status_of_infection(self, tick):
-        
         """
         Updates the status on infection each tick.
         Changes the status on infection

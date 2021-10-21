@@ -1,7 +1,5 @@
 from typing import Optional, List
 
-#from src.sim.building import Building
-#from src.sim.agent import Agent
 
 
 class Cell:
@@ -20,13 +18,8 @@ class Cell:
         # Can agents enter this cell? (Does not matter because the modelling of walking has been removed.)
         self.walkable: bool = True
 
-        # ???????? agent that is currently on this cell
-        self.resident = None  
-
         # agents on that cell
         self.dict_of_residents: dict = {}  
-
-        #self.neighbor_cells: List[Cell] = []  # benachbarte Cells, je nach Definition von Nachbar
 
         # type of location
         self.cell_type: str = "street"
