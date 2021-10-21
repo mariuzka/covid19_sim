@@ -1,4 +1,4 @@
-# An empirically-calibrated ABM for the evaluation of NPIs
+# Empirically-calibrated ABM for the evaluation of NPIs in Germany
 The overall purpose of this model is to investigate the effects of various non-pharmaceutical interventions (NPI) in curbing the spread of COVID-19.
 The model predicts case numbers of counterfactual scenarios in which certain NPIs are (not) implemented.
 The model is evaluated by its ability to reproduce time-series data of empirically observed case numbers in a baseline scenario that mimics the factual implementation of NPIs happened in spring 2020 in Germany.
