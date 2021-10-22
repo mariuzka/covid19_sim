@@ -38,7 +38,7 @@ To conduct the simulation experiments performed in this [paper](https://www.medr
 - Saarland: `"run_simulation_experiment_SL.py"`
 
 The number of replications per scenario is preconfigured to a value of 60, which could lead to a total runtime of several days if executed on a single core.
-Therefore it is recommended to change the parameter `parallel` from `False` to `True` in order to parallelize one simulation experiment on up to 10 cores (*please note that if running the simulation under windows, the attempt to parallelize might fail*).
+Therefore it is recommended to change the parameter `parallel` from `False` to `True` in order to parallelize one simulation experiment (*please note that if running the simulation under windows, the attempt to parallelize might fail*).
 
 ## Update
 We are currently working on a major update which will improve modularity, flexibilty, and efficancy of the simulation model. It will be released in November 2021.
