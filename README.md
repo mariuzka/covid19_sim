@@ -1,4 +1,4 @@
-# An empirically-calibrated ABM for the evaluation of NPIs
+# Empirically-calibrated ABM for the evaluation of NPIs in Germany
 The overall purpose of this model is to investigate the effects of various non-pharmaceutical interventions (NPI) in curbing the spread of COVID-19.
 The model predicts case numbers of counterfactual scenarios in which certain NPIs are (not) implemented.
 The model is evaluated by its ability to reproduce time-series data of empirically observed case numbers in a baseline scenario that mimics the factual implementation of NPIs happened in spring 2020 in Germany.
@@ -38,5 +38,7 @@ To conduct the simulation experiments performed in this [paper](https://www.medr
 - Saarland: `"run_simulation_experiment_SL.py"`
 
 The number of replications per scenario is preconfigured to a value of 60, which could lead to a total runtime of several days if executed on a single core.
-Therefore it is recommended to change the parameter `parallel` from `False` to `True` in order to parallelize one simulation experiment on up to 10 cores (*please note that if running the simulation under windows, the attempt to parallelize might fail*).
+Therefore it is recommended to change the parameter `parallel` from `False` to `True` in order to parallelize one simulation experiment (*please note that if running the simulation under windows, the attempt to parallelize might fail*).
 
+## Update
+We are currently working on a major update which will improve modularity, flexibilty, and efficancy of the simulation model. It will be released in November 2021.
