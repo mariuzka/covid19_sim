@@ -11,5 +11,5 @@ results = run_simulation_experiment(
     state = 8,
     infection_prob = spotpy_params["infection_prob"],
     n_ticks_to_quarantine = spotpy_params["ticks_to_quarantine"],
-    parallel = False,
+    n_cores=15,
     )

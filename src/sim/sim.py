@@ -7,6 +7,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from mpire import WorkerPool
 
 import src
 from src.sim.agent import Agent
@@ -32,10 +33,15 @@ class Sim:
             self, 
             state: int,
             n_simulated_days: int = 100,
+            n_cores: int = 1,
             ):
         
+
+
         assert state in [2,8,9,10]
         
+        self.n_cores = n_cores
+
         self.state = state
         
         self.fed_states = {
@@ -353,7 +359,7 @@ class Sim:
                 )
         
         # Desired number of agents
-        N = int(n)
+        self.N = int(n)
         
         # Population size of federal state
         empirical_population_size = self.population_data.loc[self.fed_states[self.state],"population"]
@@ -363,94 +369,35 @@ class Sim:
         output_dataframes = []
         age_distributions = []
         
-        
-        # for each internal run / repetition
-        for run in range(n_internal_runs):
-            print(f"{dt.datetime.now()} - {name_of_run}: running replication {run+1} of {n_internal_runs} ({round(((run+1)/n_internal_runs)*100, 2)}%)")
-            
-            # create population
-            agent_population_in_households = self.create_soep_population(
-                N = N,
-                agent_class = Agent,
-            )
-            
-            # Count agents
-            population_size = sum([1 for household in agent_population_in_households for agent in household])
-            
-            # Calculate scaling factor to empirical population size of federal state
-            scale_to_population = empirical_population_size / population_size
-            
-            # Count pupils
-            n_pupils = sum([1 for household in agent_population_in_households for agent in household
-                            if agent.age in self.school_age])
-            
-            # Count kindergarten kids
-            n_kindergarten_kids = sum([1 for household in agent_population_in_households for agent in household
-                            if agent.age in self.kindergarten_age])
-            
-            # Count university students
-            n_students = sum([1 for household in agent_population_in_households for agent in household
-                            if agent.student])
-            
-            # Calculate number of schools needed
-            n_schools = max(n_pupils // self.pupils_per_school, 1)
-            
-            # Calculate number of supermarkets / stores needed
-            n_supermarkets = max(population_size // self.agents_per_supermarket, 1)
-            
-            # Calculate number of Kindergarten(groups) needed
-            n_kindergartens = max(n_kindergarten_kids // self.kids_per_kindergarten, 1)
-            
-            # Calculate number of universities needed
-            n_universities = max(n_students // self.students_per_university, 1)
-            
-            # Count number of Nace2-sectors in agent population and save it in df
-            n_nace2 = [agent.nace2_short for household in agent_population_in_households for agent in household]
-            n_nace2 = pd.DataFrame(
-                pd.Series(n_nace2).value_counts(), 
-                columns = ["freq_in_simpop"]
+        # run all replications of the simulation
+        with WorkerPool(n_jobs=self.n_cores, use_dill=True) as pool:
+            output_dicts = pool.map(
+                lambda x: self.internal_run(
+                    n_agents = self.N,
+                    location_dependend_infection_prob_dict = location_dependend_infection_prob_dict,
+                    simulation_run = 999,
+                    n_initial_infections = int(n_initial_infections),
+                    n_random_infections = n_random_infections,
+                    timetable = timetable,
+                    n_ticks_to_quarantine = n_ticks_to_quarantine,
+                    display_simulation=display_simulation,
+                    ),
+                    range(n_internal_runs)
                 )
-            
-            # run internal run of simulation
-            output_dict = self.internal_run(
-                agent_population_in_households = agent_population_in_households,
-                location_dependend_infection_prob_dict = location_dependend_infection_prob_dict,
-                simulation_run = run,
-                scaling_factor = scale_to_population,
-                n_initial_infections = int(n_initial_infections),
-                n_random_infections = n_random_infections,
-                timetable = timetable,
-                n_ticks_to_quarantine = n_ticks_to_quarantine,
-                n_schools=n_schools,
-                n_supermarkets = n_supermarkets,
-                n_nace2 = n_nace2,
-                n_kindergartens = n_kindergartens,
-                n_universities = n_universities,
-                display_simulation=display_simulation,
-            )
-    
-            # append data on age distributions to list
-            age_distributions.append(output_dict["age_of_infected_agents"])
-            
-            # create dataframe containing the simulated data on infections
-            df = pd.DataFrame(output_dict["cases"])
-            
-            # calculate cases / 100k
-            df["cumulative_cases/100k"] = df["cumulative_cases"] * df["scale_to_100k"]
-            
-            # adjust number of cases so that the first simulated number (50) equals the first empirical number (approx. 50)
-            df["adj_cumulative_cases/100k"] = df["cumulative_cases/100k"] - (df["cumulative_cases/100k"][0] - self.eval_data[0])
-            
-            # append df to list
-            output_dataframes.append(df)
-            
-            # append data on adj. cases / 100k as a list to a list (for calibration)
-            list_of_scaled_cum_infections.append(list(df["adj_cumulative_cases/100k"]))
-            
-        
+  
         # calculate average results for calibration purposes
         avg_scaled_cumulative_cases = [sum(t)/len(t) for t in zip(*list_of_scaled_cum_infections)]
-        
+
+        # append df to list
+        output_dataframes = [output_dict["cases"] for output_dict in output_dicts]
+            
+        # append data on adj. cases / 100k as a list to a list (for calibration)
+        list_of_scaled_cum_infections = [list(df["adj_cumulative_cases/100k"]) for df in output_dataframes]
+            
+        # calculate average results for calibration purposes
+        avg_scaled_cumulative_cases = [sum(t)/len(t) for t in zip(*list_of_scaled_cum_infections)]
+
+
         # create main dataframe
         output_dataframe = pd.concat(output_dataframes)
         output_dataframe["date"] = output_dataframe["datetime"].apply(lambda x: x.date())
@@ -491,15 +438,9 @@ class Sim:
     
     def internal_run(
             self,
-            agent_population_in_households: List[List[Agent]],
+            n_agents,
             location_dependend_infection_prob_dict: dict,
             simulation_run: int,
-            n_nace2,
-            n_schools,
-            n_supermarkets,
-            n_kindergartens,
-            n_universities,
-            scaling_factor,
             n_ticks_to_quarantine,
             n_initial_infections,
             n_random_infections,
@@ -511,6 +452,49 @@ class Sim:
         This method runs the simulation internally. 
         For each model repetition, this method is executed one time by the method "run()".
         """
+
+        # create population
+        agent_population_in_households = self.create_soep_population(
+            N = self.N,
+            agent_class = Agent,
+        )
+        
+        # Count agents
+        population_size = sum([1 for household in agent_population_in_households for agent in household])
+        
+        # Calculate scaling factor to empirical population size of federal state
+        #scale_to_population = empirical_population_size / population_size
+        
+        # Count pupils
+        n_pupils = sum([1 for household in agent_population_in_households for agent in household
+                        if agent.age in self.school_age])
+        
+        # Count kindergarten kids
+        n_kindergarten_kids = sum([1 for household in agent_population_in_households for agent in household
+                        if agent.age in self.kindergarten_age])
+        
+        # Count university students
+        n_students = sum([1 for household in agent_population_in_households for agent in household
+                        if agent.student])
+        
+        # Calculate number of schools needed
+        n_schools = max(n_pupils // self.pupils_per_school, 1)
+        
+        # Calculate number of supermarkets / stores needed
+        n_supermarkets = max(population_size // self.agents_per_supermarket, 1)
+        
+        # Calculate number of Kindergarten(groups) needed
+        n_kindergartens = max(n_kindergarten_kids // self.kids_per_kindergarten, 1)
+        
+        # Calculate number of universities needed
+        n_universities = max(n_students // self.students_per_university, 1)
+        
+        # Count number of Nace2-sectors in agent population and save it in df
+        n_nace2 = [agent.nace2_short for household in agent_population_in_households for agent in household]
+        n_nace2 = pd.DataFrame(
+            pd.Series(n_nace2).value_counts(), 
+            columns = ["freq_in_simpop"]
+            )
     
         # create world
         world = World(self.grid_x_len, self.grid_y_len)
@@ -860,7 +844,7 @@ class Sim:
              "n_inf_age_0_29" : n_inf_age_0_29,
              "n_inf_age_30_59": n_inf_age_30_59,
              "n_inf_age_60": n_inf_age_60,
-             "scale_to_population": scaling_factor,
+             #"scale_to_population": scaling_factor,
              "scale_to_100k": 100000 / len(world.agents["agents"]),
             }
         output_data.append(todays_infection_data)
@@ -942,7 +926,7 @@ class Sim:
                      "n_inf_age_0_29" : n_inf_age_0_29,
                      "n_inf_age_30_59": n_inf_age_30_59,
                      "n_inf_age_60": n_inf_age_60,
-                     "scale_to_population": scaling_factor,
+                     #"scale_to_population": scaling_factor,
                      "scale_to_100k": 100000 / len(world.agents["agents"]),
                     }
                     
@@ -1062,7 +1046,6 @@ class Sim:
                                             # short time work?
                                             random.random() < self.nace2_short_reduction_of_workhours[
                                                 current_measures["nace2_reduction_of_workhours"]][agent.nace2_short]
-                                        
                                         ):
                                         
                                         # work at home
@@ -1149,6 +1132,16 @@ class Sim:
                     )
         
         
+        # create dataframe containing the simulated data on infections
+        df = pd.DataFrame(output_data)
+        
+        # calculate cases / 100k
+        df["cumulative_cases/100k"] = df["cumulative_cases"] * df["scale_to_100k"]
+        
+        # adjust number of cases so that the first simulated number (50) equals the first empirical number (approx. 50)
+        df["adj_cumulative_cases/100k"] = df["cumulative_cases/100k"] - (df["cumulative_cases/100k"][0] - self.eval_data[0])
+        
+
         age_of_infected_agents = [
             agent.age 
             for agent in world.agents["agents"]
@@ -1157,8 +1150,10 @@ class Sim:
         
         output_dict = {
             "age_of_infected_agents": age_of_infected_agents,
-            "cases": output_data,
+            "cases": df,
             }
+
+
         return output_dict
 
 

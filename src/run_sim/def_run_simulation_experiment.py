@@ -16,7 +16,7 @@ def run_simulation_experiment(
         state: int,
         infection_prob: float,
         n_ticks_to_quarantine: Union[int, float],
-        parallel: bool,
+        n_cores: int = 1,
         n_internal_runs: int = 60,
         n_initial_infections: int = 50,
         n: int = 100000,
@@ -25,9 +25,6 @@ def run_simulation_experiment(
         display_simulation: bool = False,
     ):
 
-    # create state-specific simulation model
-    model = Sim(state)
-    
     # list of all timetables + a scenario name
     timetables = [
         (timetable_default, "baseline"),
@@ -56,9 +53,10 @@ def run_simulation_experiment(
          display_simulation,
         ] for timetable in timetables]
     
-    if parallel:
-        results = Parallel(n_jobs=10)(map(delayed(model.run), params_experiment))
-    else:
-        results = [model.run(params) for params in params_experiment]
+    # create state-specific simulation model
+    model = Sim(state=state, n_cores=n_cores)
+
+    # run scenarios step by step
+    results = [model.run(params) for params in params_experiment]
     
     return results

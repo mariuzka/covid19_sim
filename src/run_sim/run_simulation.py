@@ -31,6 +31,8 @@ N_INTERNAL_RUNS = 60
 # set a name for the simulation
 NAME_OF_RUN = "baseline_scenario_bavaria"
 
+# number of cores used for parallel computation
+N_CORES = 15
 
 ##################################################################################
 # model setup and execution (do not touch)
@@ -66,5 +68,5 @@ params = [
      DISPLAY_SIMULATION,
     ]
 
-model = Sim(STATE)
+model = Sim(STATE, n_cores=N_CORES)
 output = model.run(params)
