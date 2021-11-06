@@ -41,4 +41,4 @@ The number of replications per scenario is preconfigured to a value of 60, which
 Therefore it is recommended to change the parameter `parallel` from `False` to `True` in order to parallelize one simulation experiment (*please note that if running the simulation under windows, the attempt to parallelize might fail*).
 
 ## Update
-We are currently working on a major update which will improve modularity, flexibilty, and efficancy of the simulation model. It will be released in November 2021.
+We are currently working on a major update which will improve modularity, flexibilty, and efficancy of the simulation model. It will be released soon.
